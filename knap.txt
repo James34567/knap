@@ -1,0 +1,72 @@
+import java.util.Scanner;
+
+public class Knapsack {
+
+    static int Knapsack(int[] weights, int[] values, int capacity) {
+        boolean[] included = new boolean[weights.length];
+        boolean[] bestIncluded = new boolean[weights.length];
+        int maxValue = branchAndBound(weights, values, capacity, 0, 0, 0, included, bestIncluded);
+        System.out.print("Weights included in knapsack: ");
+        for (int i = 0; i < weights.length; i++) {
+            if (bestIncluded[i]) {
+                System.out.print(weights[i] + " ");
+            }
+        }
+        System.out.println();
+        return maxValue;
+    }
+
+    static int branchAndBound(int[] weights, int[] values, int capacity, int index, int currentWeight, int currentValue, boolean[] included, boolean[] bestIncluded) {
+        if (currentWeight > capacity) {
+            return 0;
+        }
+
+        if (index == weights.length) {
+            System.arraycopy(included, 0, bestIncluded, 0, included.length);
+            return currentValue;
+        }
+
+        boolean[] includedWithItem = included.clone();
+        int withItem = 0;
+        if (currentWeight + weights[index] <= capacity) {
+            includedWithItem[index] = true;
+            withItem = branchAndBound(weights, values, capacity, index + 1, currentWeight + weights[index], currentValue + values[index], includedWithItem, bestIncluded);
+        }
+
+        boolean[] includedWithoutItem = included.clone();
+        int withoutItem = branchAndBound(weights, values, capacity, index + 1, currentWeight, currentValue, includedWithoutItem, bestIncluded);
+
+        if (withItem > withoutItem) {
+            System.arraycopy(includedWithItem, 0, bestIncluded, 0, included.length);
+            return withItem;
+        } else {
+            System.arraycopy(includedWithoutItem, 0, bestIncluded, 0, included.length);
+            return withoutItem;
+        }
+    }
+
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+
+        System.out.print("No of items: ");
+        int n = sc.nextInt();
+        int[] weights = new int[n];
+        int[] values = new int[n];
+
+        System.out.println("Weights of items:");
+        for (int i = 0; i < n; i++) {
+            weights[i] = sc.nextInt();
+        }
+
+        System.out.println("Values of items:");
+        for (int i = 0; i < n; i++) {
+            values[i] = sc.nextInt();
+        }
+
+        System.out.print("Capacity of knapsack: ");
+        int capacity = sc.nextInt();
+
+        int maxValue = Knapsack(weights, values, capacity);
+        System.out.println("Maximum value: " + maxValue);
+    }
+}
